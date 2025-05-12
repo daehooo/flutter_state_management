@@ -32,6 +32,8 @@ Flutter에서 사용되는 다양한 상태관리 방식들을 학습하고 정�
 - Badge Package를 이용한 상품 장바구니 갯수 나타내기
 
 ### 🗂️ 프로젝트 구조
+
+```
 lib/
 ├── main.dart
 ├── 1-stateful_widget/
@@ -39,11 +41,12 @@ lib/
 │   ├── home_page.dart
 │   └── store.dart
 └── common/
-├── bottom_bar.dart
-├── product_tile.dart
-└── product.dart
+    ├── bottom_bar.dart
+    ├── product_tile.dart
+    └── product.dart
+```
 
----
+
 
 ## ✍️ 정리 방식
 
