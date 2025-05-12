@@ -20,11 +20,11 @@ Flutter에서 사용되는 다양한 상태관리 방식들을 학습하고 정�
 
 ---
 
-## ✅ 현재 브랜치: `main`
+## ✅ 현재 브랜치: `inheritedwidget-basic`
 
-### 📱 예제: `setState`를 활용한 카트 앱
+### 📱 예제: `inheritedwidget`를 활용한 간단 예제
 
-이 브랜치에서는 `setState`를 활용하여 간단한 쇼핑카트 앱을 구현했습니다. Flutter 상태관리의 기초를 이해하는 데 도움이 됩니다.
+이 브랜치에서는 `inheritedwidget`를 이해하기 위한 간단한 예제 및 setState를 이용한 상태관리를 inheritedwidget로 바꾸어 적용하여 간단한 쇼핑카트 앱을 구현했습니다. 
 
 ### 🧩 주요 기능
 - BottomNavigationBar를 이용한 상품 Cart 나타내기
@@ -64,5 +64,5 @@ lib/
 ## 🚀 브랜치 전환 방법
 
 ```bash
-# 예: provider 상태관리 브랜치로 이동
-git checkout provider-basic
+# 예: setState 상태관리 브랜치로 이동
+git checkout main
