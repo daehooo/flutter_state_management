@@ -22,29 +22,7 @@ Flutter에서 사용되는 다양한 상태관리 방식들을 학습하고 정�
 
 ## ✅ 현재 브랜치: `inheritedwidget-basic`
 
-### 📱 예제: `inheritedwidget`를 활용한 간단 예제
 
-이 브랜치에서는 `inheritedwidget`를 이해하기 위한 간단한 예제 및 setState를 이용한 상태관리를 inheritedwidget로 바꾸어 적용하여 간단한 쇼핑카트 앱을 구현했습니다. 
-
-### 🧩 주요 기능
-- BottomNavigationBar를 이용한 상품 Cart 나타내기
-- 상품 장바구니 담기 / 제거하기
-- Badge Package를 이용한 상품 장바구니 갯수 나타내기
-
-### 🗂️ 프로젝트 구조
-
-```
-lib/
-├── main.dart
-├── 1-stateful_widget/
-│   ├── cart.dart
-│   ├── home_page.dart
-│   └── store.dart
-└── common/
-    ├── bottom_bar.dart
-    ├── product_tile.dart
-    └── product.dart
-```
 
 
 
@@ -66,3 +44,120 @@ lib/
 ```bash
 # 예: setState 상태관리 브랜치로 이동
 git checkout main
+
+# inheritedwidget 이해하기
+
+### 📱 예제: `inheritedwidget`를 활용한 간단 예제
+
+이 브랜치에서는 `inheritedwidget`를 이해하기 위한 간단한 예제 및 setState를 이용한 상태관리를 inheritedwidget로 바꾸어 적용하여 간단한 쇼핑카트 앱을 구현했습니다. 
+
+### InheritedWidget 기본 개념
+
+InheritedWidget은 자식 위젯이 중간 위젯을 거치지 않고 곧바로 접근 할 수 있는 위젯입니다. 이를 활용하여 Prop Drilling 문제를 해결할 수 있습니다.
+
+<img src="https://github.com/daehooo/flutter_state_management/blob/inheritedwidget-basic/assets/inherited_widget_image.png?raw=true" alt="InheritedWidget 예제 화면" width="300"/>
+
+### 1.InheritedWidget을 상속받아 구현할 수 있습니다.
+
+```dart
+class InheritedParent extends InheritedWidget {
+  const InheritedParent({
+    super.key,
+    required super.child,
+    required this.state,
+    required this.onPressed,
+  });
+
+  final int state;
+  final void Function() onPressed;
+
+  @override
+  bool updateShouldNotify(InheritedParent oldWidget) {
+    print("updateShouldNotify : old = ${oldWidget.state} / new = $state");
+    return state != oldWidget.state; // 자식 위젯 업데이트 여부
+  }
+}
+```
+
+InheritedWidget을 상속받고, updateShouldNotify 를 반드시 재정의 해줘야 합니다.
+또한 상태를 생성자로 전달받아 가지고 있습니다.
+
+### 2. 자식 위젯에선 context.dependOnInheritedWidgetOfExactType<클래스명>()를 이용해 InheritedWidget에에 접근할 수 있습니다. 따라서 생성자로 상태를 전달 받을 필요가 없습니다.
+
+```dart
+class Child extends StatelessWidget {
+  const Child({super.key});
+  
+  @override
+  Widget build(BuildContext context) {
+    /// BuildContext를 이용하여 InheritedParent 위젯에 접근
+    InheritedParent inherited = context.dependOnInheritedWidgetOfExactType<InheritedParent>()!;
+    return ElevatedButton(
+      onPressed: inherited.onPressed,
+      child: Text("Child : ${inherited.state}"),
+    );
+  }
+}
+```
+
+🍎 BuildContext를 이용하면, 부모에 접근할 수 있습니다. (단, 위젯 트리상에서 InheritedWidget 위젯보다 밑에 있는 위젯에서만 접근 가능합니다.) 
+
+
+### 3. InheritedWidget은 자식 위젯의 접근을 돕는 역할 뿐이라, 상태 변경 및 갱신은 StatefulWidget을 이용해 구현하고, 값과 이벤트 함수를 전달 받았습니다.
+
+```dart
+
+class _MyAppState extends State<MyApp> {
+  // 공유 상태
+  int state = 0;
+
+  // 공유 상태 업데이트
+  void increaseState() {
+    setState(() {
+      state += 1;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("MyApp build 호출");
+    return InheritedParent(
+      state: state, // InheritedWidget에 state 전달
+      onPressed: increaseState, // InheritedWidget에 increaseState 전달
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("state : $state"),
+              const Child(), // 상태 변수와 이벤트 함수를 넘겨주지 않아도 됨(InheritedWidget 도입 효과)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### 4. updateShouldNotify()
+해당 InheritedWidget에 접근하는 자식 위젯들의 갱신 여부를 결정합니다.
+
+```dart
+  @override
+  bool updateShouldNotify(InheritedParent oldWidget) {
+    print("updateShouldNotify : old = ${oldWidget.state} / new = $state");
+    return state != oldWidget.state; // 자식 위젯 업데이트 여부
+  }
+```
+
+### 💡 InheritedParent에서 updateShouldNotify()를 false로 반환하면, 자식 위젯이 갱신되지 않습니다.
+
+참고로 Child 위젯이 const로 선언 되지 않는다면, 항상 갱신됩니다.
+const로 생성된 위젯은 부모 위젯의 build() 메소드가 호출되어도 갱신이 되지 않지만, InheritedWidget을 내부에서 사용하는 경우엔 updateShouldNotify()에서 true를 반환하는 경우 갱신 됩니다.
+
+
+## 이를 활용한 코드 적용
+
+
+

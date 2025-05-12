@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_practice/common/product.dart';
+import 'package:flutter_practice/common/product_tile.dart';
 
 class Store extends StatelessWidget {
   const Store({
