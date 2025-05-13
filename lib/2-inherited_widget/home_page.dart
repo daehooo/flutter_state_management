@@ -22,11 +22,14 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       if(cartProductList.contains(product)) {
         // cartProductList.remove(product);
+        // 기존 배열과 서로 다른것을 참조
         cartProductList = cartProductList.where((element) {
           return element != product;
-        });
+        }).toList();
       } else {
         // cartProductList.add(product);
+        cartProductList = [...cartProductList, product];
+        // 다른 참조객체를 갖게 됨
       }
     });
   }
