@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_practice/1-stateful_widget/home_page.dart';
+import 'package:flutter_practice/2-inherited_widget/home_page.dart';
 
 void main() {
   runApp(const MyApp());

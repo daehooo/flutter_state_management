@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_practice/2-inherited_widget/state/inherited_cart.dart';
 import 'package:flutter_practice/common/product.dart';
 import 'package:flutter_practice/common/product_tile.dart';
 
@@ -10,8 +11,9 @@ class Cart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Product> cartProductList = [];
+    InheritedCart inheritedCart = context.dependOnInheritedWidgetOfExactType<InheritedCart>()!;
 
+    final List<Product> cartProductList = inheritedCart.cartProductList;
     return Scaffold(
       body: cartProductList.isEmpty
 
@@ -31,7 +33,7 @@ class Cart extends StatelessWidget {
                 return ProductTile(
                   product: product,
                   isInCart: true,
-                  onPressed: (product) {},
+                  onPressed: inheritedCart.onProductPressed,
                 );
               },
             ),
