@@ -309,3 +309,149 @@ void main() {
     - 초반에 사용하지 않는 provider를 실행시키지 않아 가벼워짐
     - Provider가 부모 위젯으로 등록되어 있지 않은 경우, 자식 위젯에서 접근시 런타임 에러가 발생함
     - 위젯 트리상에 등록시 의존성 순서가 중요
+
+
+## 코드 작성 적용해보기
+작성된 코드를 보는것도 좋지만, 해당 내용을 직접 작성해봅시다.
+
+### 1. 0-set_state 폴더에서 시작하세요.
+해당 코드는 상태관리를 적용하지 않은 코드를 제공합니다.
+
+### 2. provider 상태관리 추가하기
+terminal에서 아래 명령어를 입력하여 패키지를 추가합니다.
+```
+flutter pub add provider
+``` 
+
+### 3. 상태관리 폴더 만들기
+state 폴더를 만들고, 상태관리를 나타낼 provider_badge.dart, provider_cart.dart 파일을 만듭니다.
+provider_badge 클래스는 provider_cart.dart에 정의된 상태인 cartProductList의 갯수를 읽어와야 하기때문에 의존성이 생깁니다. 자세한 내용은 위의 정리된 내용을 참고해주세요.
+또한 생성자에 addListener를 통해 providerCart의 배열의 길이가 달라졌을 때를 감지합니다. 
+
+
+```dart
+// provider_cart.dart
+class ProviderCart with ChangeNotifier {
+  List<Product> cartProductList = [];
+
+  void onProductPressed(Product product) {
+    if(cartProductList.contains(product)) {
+      cartProductList = cartProductList.where((cartProduct) {
+        return cartProduct != product;
+      }).toList();
+    } else {
+      cartProductList = [...cartProductList , product];
+    }
+      notifyListeners();
+  } 
+}
+
+/// provider_badge.dart
+class ProviderBadge with ChangeNotifier {
+  ProviderBadge({
+    required this.providerCart,
+  }) {
+    providerCart.addListener(providerCartListener);
+  }
+
+  int counter = 0;
+  final ProviderCart providerCart;
+
+  void providerCartListener() {
+    counter = providerCart.cartProductList.length;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    providerCart.removeListener(providerCartListener);
+    super.dispose();
+  }
+}
+```
+
+### 4. 상태관리 적용하기
+- 정의된 상태관리를 사용하여 화면에 나타내는 코드를 작성합니다.
+이전 이론에서 배웠던, context.read, watch, select를 사용합니다.
+
+1. store.dart 파일 수정
+우선적으로 store.dart 파일을 수정합니다. 아래 코드는 storeProductList 배열을 ListView.builder를 사용하여 나타냅니다. watch를 통해 변화를 감지했을 때 build를 재실행하여 화면에 나타냅니다.
+
+```dart
+
+class Store extends StatelessWidget {
+  const Store({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    ProviderCart providerCart = context.watch();
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: storeProductList.length,
+        itemBuilder: (context, index) {
+          Product product = storeProductList[index];
+          return ProductTile(
+            product: product,
+            isInCart: providerCart.cartProductList.contains(product),
+            onPressed: providerCart.onProductPressed,
+          );
+        },
+      ),
+    );
+  }
+}
+```
+2. cart.dart 파일 수정
+provider_cart.dart에 정의된 cartProductList의 배열에 있는 상품들을 나타내는 화면입니다. `List<Product>` 형식만 나타내면 되므로, select를 이용하여 구현합니다.
+
+```dart
+final List<Product> cartProductList = context.select<ProviderCart, List<Product>>((productCart) => productCart.cartProductList );
+```
+
+위의 코드를 추가하면 상태관리를 통해 추가한 카트목록의 상품이 나타납니다.
+또한 ProductTile의 onPressed 를 아래와 같이 수정합니다.
+
+```dart
+onPressed: context.read<ProviderCart>()onProductPressed,
+```
+
+
+home_page.dart 파일 수정
+
+우선 Scaffold을 여러개의 상태관리를 위해 MultiProvider로 감쌉니다.
+ProviderBadge는 생성자로 ProviderCart를 입력해야 합니다.
+
+```dart
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ProviderCart(),), 
+        ChangeNotifierProvider(create: (context) => ProviderBadge(providerCart: context.read())), 
+      ],
+      child: Scaffold(
+      ...
+```
+
+마지막으로, IndexedStack에 사용되는 badgeCounter를 사용하기 위해 Consumer위젯을 사용합니다. 해당 부분은 BottomBar에서만 사용되기 때문에 해당 위젯을 Consumer위젯을 Selector로 감쌉니다.
+
+Select를 사용할때 타입에 주의해서 작성합니다.
+필수 생성자는 selector, builder가 있고 selector에서 생성한 badgeProvider.counter를 사용하여 builder에 2번째 인자에 넣어 사용합니다.
+```dart
+bottomNavigationBar: Selector<ProviderBadge, int>(
+          selector: (context, badgeProvider) => badgeProvider.counter,
+          builder: (context, counter, child) {
+            return BottomBar(
+              currentIndex: currentIndex,
+              cartTotal: counter.toString(),
+              onTap: (index) => setState(() {
+                currentIndex = index;
+              }),
+            );
+          }
+        ),
+```
+
