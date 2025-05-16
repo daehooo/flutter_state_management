@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_practice/4-riverpod/cart.dart';
+import 'package:flutter_practice/4-riverpod/state/riverpod_badge.dart';
 import 'package:flutter_practice/4-riverpod/store.dart';
 
 import 'package:flutter_practice/common/bottom_bar.dart';
@@ -30,12 +31,14 @@ class _HomePageState extends State<HomePage> {
             Cart(),
           ],
         ),
-        bottomNavigationBar: BottomBar(
-          currentIndex: currentIndex,
-          cartTotal: "0",
-          onTap: (index) => setState(() {
-            currentIndex = index;
-          }),
+        bottomNavigationBar: Consumer(
+          builder: (context, ref, child)=> BottomBar(
+            currentIndex: currentIndex,
+            cartTotal: ref.watch(badgeProvider).toString(),
+            onTap: (index) => setState(() {
+              currentIndex = index;
+            }),
+          ),
         ),
       ),
     );
