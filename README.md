@@ -64,5 +64,5 @@ lib/
 ## 🚀 브랜치 전환 방법
 
 ```bash
-# 예: provider 상태관리 브랜치로 이동
-git checkout provider-basic
+# 예: riverpod 상태관리 브랜치로 이동
+git checkout riverpod-basic
