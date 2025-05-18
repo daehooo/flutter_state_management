@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_practice/0-set_state/cart.dart';
-import 'package:flutter_practice/0-set_state/store.dart';
+import 'package:flutter_practice/0-setState/cart.dart';
+import 'package:flutter_practice/0-setState/store.dart';
 import 'package:flutter_practice/common/bottom_bar.dart';
 
 class HomePage extends StatefulWidget {

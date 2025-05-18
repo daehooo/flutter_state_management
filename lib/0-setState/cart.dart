@@ -1,6 +1,6 @@
-import 'package:apple_store/common/product.dart';
-import 'package:apple_store/common/product_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_practice/common/product.dart';
+import 'package:flutter_practice/common/product_tile.dart';
 
 class Cart extends StatelessWidget {
   const Cart({
